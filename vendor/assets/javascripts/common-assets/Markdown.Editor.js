@@ -568,7 +568,7 @@
 
             var handled = false;
 
-            if (event.ctrlKey || event.metaKey) {
+            if ((event.ctrlKey || event.metaKey) && !event.altKey) {
 
                 // IE and Opera do not support charCode.
                 var keyCode = event.charCode || event.keyCode;
@@ -644,7 +644,7 @@
             util.addEvent(panels.input, "keypress", function (event) {
                 // keyCode 89: y
                 // keyCode 90: z
-                if ((event.ctrlKey || event.metaKey) && (event.keyCode == 89 || event.keyCode == 90)) {
+                if ((event.ctrlKey || event.metaKey) && !event.altKey && (event.keyCode == 89 || event.keyCode == 90)) {
                     event.preventDefault();
                 }
             });
@@ -2014,7 +2014,7 @@
                         chunk.before += "    ";
                 }
                 else {
-                    chunk.selection = chunk.selection.replace(/^[ ]{4}/gm, "");
+                    chunk.selection = chunk.selection.replace(/^(?:[ ]{4}|[ ]{0,3}\t)/gm, "");
                 }
             }
         }
