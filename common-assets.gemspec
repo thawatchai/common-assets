@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name                      = "common-assets"
-  s.version                   = "0.0.12"
+  s.version                   = "0.0.13"
   s.platform                  = Gem::Platform::RUBY
   s.authors                   = [ "John Tjanaka" ]
   s.email                     = [ "zonecheung@gmail.com" ]
