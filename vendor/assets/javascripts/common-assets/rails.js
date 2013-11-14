@@ -18,12 +18,13 @@
 
   // Shorthand to make it a little easier to call public rails functions from within rails.js
   var rails;
+  var $document = $(document);
 
   $.rails = rails = {
     // Link elements bound by jquery-ujs
     linkClickSelector: 'a[data-confirm], a[data-method], a[data-remote], a[data-disable-with]',
 
-    // Button elements boud jquery-ujs
+    // Button elements bound by jquery-ujs
     buttonClickSelector: 'button[data-remote]',
 
     // Select elements bound by jquery-ujs
@@ -160,18 +161,18 @@
       var href = rails.href(link),
         method = link.data('method'),
         target = link.attr('target'),
-        csrf_token = $('meta[name=csrf-token]').attr('content'),
-        csrf_param = $('meta[name=csrf-param]').attr('content'),
+        csrfToken = $('meta[name=csrf-token]').attr('content'),
+        csrfParam = $('meta[name=csrf-param]').attr('content'),
         form = $('<form method="post" action="' + href + '"></form>'),
-        metadata_input = '<input name="_method" value="' + method + '" type="hidden" />';
+        metadataInput = '<input name="_method" value="' + method + '" type="hidden" />';
 
-      if (csrf_param !== undefined && csrf_token !== undefined) {
-        metadata_input += '<input name="' + csrf_param + '" value="' + csrf_token + '" type="hidden" />';
+      if (csrfParam !== undefined && csrfToken !== undefined) {
+        metadataInput += '<input name="' + csrfParam + '" value="' + csrfToken + '" type="hidden" />';
       }
 
       if (target) { form.attr('target', target); }
 
-      form.hide().append(metadata_input).appendTo('body');
+      form.hide().append(metadataInput).appendTo('body');
       form.submit();
     },
 
@@ -279,22 +280,22 @@
 
   };
 
-  if (rails.fire($(document), 'rails:attachBindings')) {
+  if (rails.fire($document, 'rails:attachBindings')) {
 
     $.ajaxPrefilter(function(options, originalOptions, xhr){ if ( !options.crossDomain ) { rails.CSRFProtection(xhr); }});
 
-    $(document).delegate(rails.linkDisableSelector, 'ajax:complete', function() {
+    $document.delegate(rails.linkDisableSelector, 'ajax:complete', function() {
         rails.enableElement($(this));
     });
 
-    $(document).delegate(rails.linkClickSelector, 'click.rails', function(e) {
-      var link = $(this), method = link.data('method'), data = link.data('params');
+    $document.delegate(rails.linkClickSelector, 'click.rails', function(e) {
+      var link = $(this), method = link.data('method'), data = link.data('params'), metaClick = e.metaKey || e.ctrlKey;
       if (!rails.allowAction(link)) return rails.stopEverything(e);
 
-      if (link.is(rails.linkDisableSelector)) rails.disableElement(link);
+      if (!metaClick && link.is(rails.linkDisableSelector)) rails.disableElement(link);
 
       if (link.data('remote') !== undefined) {
-        if ( (e.metaKey || e.ctrlKey) && (!method || method === 'GET') && !data ) { return true; }
+        if (metaClick && (!method || method === 'GET') && !data) { return true; }
 
         var handleRemote = rails.handleRemote(link);
         // response from rails.handleRemote() will either be false or a deferred object promise.
@@ -311,7 +312,7 @@
       }
     });
 
-    $(document).delegate(rails.buttonClickSelector, 'click.rails', function(e) {
+    $document.delegate(rails.buttonClickSelector, 'click.rails', function(e) {
       var button = $(this);
       if (!rails.allowAction(button)) return rails.stopEverything(e);
 
@@ -319,7 +320,7 @@
       return false;
     });
 
-    $(document).delegate(rails.inputChangeSelector, 'change.rails', function(e) {
+    $document.delegate(rails.inputChangeSelector, 'change.rails', function(e) {
       var link = $(this);
       if (!rails.allowAction(link)) return rails.stopEverything(e);
 
@@ -327,7 +328,7 @@
       return false;
     });
 
-    $(document).delegate(rails.formSubmitSelector, 'submit.rails', function(e) {
+    $document.delegate(rails.formSubmitSelector, 'submit.rails', function(e) {
       var form = $(this),
         remote = form.data('remote') !== undefined,
         blankRequiredInputs = rails.blankInputs(form, rails.requiredInputSelector),
@@ -362,7 +363,7 @@
       }
     });
 
-    $(document).delegate(rails.formInputClickSelector, 'click.rails', function(event) {
+    $document.delegate(rails.formInputClickSelector, 'click.rails', function(event) {
       var button = $(this);
 
       if (!rails.allowAction(button)) return rails.stopEverything(event);
@@ -374,19 +375,19 @@
       button.closest('form').data('ujs:submit-button', data);
     });
 
-    $(document).delegate(rails.formSubmitSelector, 'ajax:beforeSend.rails', function(event) {
+    $document.delegate(rails.formSubmitSelector, 'ajax:beforeSend.rails', function(event) {
       if (this == event.target) rails.disableFormElements($(this));
     });
 
-    $(document).delegate(rails.formSubmitSelector, 'ajax:complete.rails', function(event) {
+    $document.delegate(rails.formSubmitSelector, 'ajax:complete.rails', function(event) {
       if (this == event.target) rails.enableFormElements($(this));
     });
 
     $(function(){
       // making sure that all forms have actual up-to-date token(cached forms contain old one)
-      var csrf_token = $('meta[name=csrf-token]').attr('content');
-      var csrf_param = $('meta[name=csrf-param]').attr('content');
-      $('form input[name="' + csrf_param + '"]').val(csrf_token);
+      var csrfToken = $('meta[name=csrf-token]').attr('content');
+      var csrfParam = $('meta[name=csrf-param]').attr('content');
+      $('form input[name="' + csrfParam + '"]').val(csrfToken);
     });
   }
 
